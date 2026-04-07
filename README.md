@@ -1,4 +1,6 @@
-# ðŸ§  SpinalCord LLM â€” Project by Shivansh Darji (AppDice)
+# SpinalCord LLM — Project by Shivansh Darji (AppDice)
+
+**Repository:** [github.com/Shivanshdarji/Spinal-cord](https://github.com/Shivanshdarji/Spinal-cord)
 
 > A revolutionary speculative-decoding based LLM architecture inspired by the biological spinal cord reflex arc.
 > A small "Draft" model (Spinal Cord) predicts tokens; a large "Verify" model (Brain) confirms them â€” delivering 2xâ€“3x inference speed.
@@ -126,5 +128,4 @@ Test integrated Draft+Brain + reflex: `python -u test_spinalcord_generate.py`
 - **Single machine / LAN:** run `dashboard/run_dashboard_prod.bat` (binds `0.0.0.0` by default). Optional firewall: `deploy/open_firewall_llama.ps1` (Administrator PowerShell). Llama scaffold variant: `dashboard/run_dashboard_llama_scaffold_prod.bat`.
 - **Docker edge (nginx + UI, API on host):** see **`deploy/README.md`** and `deploy/docker-compose.yml` (requires Docker Desktop).
 - **Cloud GPU VPS:** see **`deploy/CLOUD.md`** and `deploy/docker-compose.cloud.example.yml`.
-
 
