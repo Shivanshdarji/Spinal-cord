@@ -41,8 +41,9 @@ Use `OPENAI_API_KEY` or `HF_TOKEN` if your endpoint requires a key.
 
 ## Hugging Face Spaces
 
-- Build context: this folder (`envs/spinalcord_bench`).
-- Dockerfile: `Dockerfile` (exposes **7860**).
+- **Recommended:** link the **GitHub repo** and use the **`Dockerfile` at the repository root** (build context = whole repo; copies `envs/spinalcord_bench` into the image).
+- Alternative: build only from this folder using `envs/spinalcord_bench/Dockerfile` if your host lets you set the build context to this directory.
+- Exposes **7860**; HF sets **`PORT`** automatically.
 - Set Space secrets if your app calls a remote API; the **environment server** itself does not download model weights.
 
 Tag the GitHub repository with **`openenv`** for discoverability.

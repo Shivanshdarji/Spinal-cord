@@ -1,0 +1,12 @@
+# Shrink HF / Docker build context (repo root is the build context)
+.git
+**/__pycache__
+**/*.pyc
+.venv
+venv
+**/*.gguf
+**/*.pt
+**/*.safetensors
+**/*.bin
+checkpoints
+models
