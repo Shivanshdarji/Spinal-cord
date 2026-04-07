@@ -1,3 +1,18 @@
+---
+title: SpinalCord Bench (OpenEnv)
+emoji: 🧠
+colorFrom: blue
+colorTo: green
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: OpenEnv API for SpinalCord benchmarks; no weights in image.
+tags:
+  - openenv
+  - llm
+  - fastapi
+---
+
 # SpinalCord LLM — Project by Shivansh Darji (AppDice)
 
 **Repository:** [github.com/Shivanshdarji/Spinal-cord](https://github.com/Shivanshdarji/Spinal-cord)
