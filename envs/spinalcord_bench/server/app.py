@@ -17,6 +17,20 @@ app = create_app(
 )
 
 
+@app.get("/")
+def root() -> dict[str, str]:
+    """HF Spaces loads `/` in the iframe; OpenEnv otherwise has no index route."""
+    return {
+        "service": "SpinalCord Bench (OpenEnv)",
+        "docs": "/docs",
+        "health": "/health",
+        "schema": "/schema",
+        "websocket": "/ws",
+        "reset": "POST /reset",
+        "step": "POST /step",
+    }
+
+
 def main() -> None:
     import uvicorn
 
