@@ -123,6 +123,14 @@ See **`docs/CONVERSATION_TRAINING.md`** for mix weights (`--conv_story`, `--conv
 
 Test integrated Draft+Brain + reflex: `python -u test_spinalcord_generate.py`
 
+## OpenEnv — SpinalCord Bench (hackathon)
+
+The **`envs/spinalcord_bench`** package is an [OpenEnv](https://github.com/meta-pytorch/OpenEnv)-compatible environment: three graded text tasks, `openenv.yaml`, WebSocket client, Dockerfile for **Hugging Face Spaces**, and `openenv validate` (requires `openenv-core` + `uv lock`).
+
+- **Server:** `pip install -e envs/spinalcord_bench` then `uvicorn spinalcord_bench.server.app:app --port 7860`
+- **Baseline:** point `OPENAI_BASE_URL` at your **`llama-server`** (same stack as `dashboard/run_dashboard*.bat`) and run `python envs/spinalcord_bench/baseline_run.py`
+- **Docs:** see **`envs/spinalcord_bench/README.md`**
+
 ## Deploy (LAN / demo)
 
 - **Single machine / LAN:** run `dashboard/run_dashboard_prod.bat` (binds `0.0.0.0` by default). Optional firewall: `deploy/open_firewall_llama.ps1` (Administrator PowerShell). Llama scaffold variant: `dashboard/run_dashboard_llama_scaffold_prod.bat`.

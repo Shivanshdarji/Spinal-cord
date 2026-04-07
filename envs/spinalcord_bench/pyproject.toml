@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openenv-spinalcord-bench"
+version = "1.0.0"
+description = "SpinalCord Bench — OpenEnv text tasks with deterministic graders"
+requires-python = ">=3.10"
+dependencies = [
+  "openenv-core[core]>=0.2.3",
+  "fastapi>=0.115.0",
+  "pydantic>=2.0.0",
+  "uvicorn[standard]>=0.24.0",
+  "openai>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+
+[project.scripts]
+server = "spinalcord_bench.server.app:main"
+spinalcord-bench-server = "spinalcord_bench.server.app:main"
+
+[tool.setuptools]
+packages = ["spinalcord_bench", "spinalcord_bench.server"]
+package-dir = { "spinalcord_bench" = ".", "spinalcord_bench.server" = "server" }
+
+[tool.setuptools.package-data]
+spinalcord_bench = ["openenv.yaml", "*.yaml", "*.yml"]
