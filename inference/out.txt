@@ -1,0 +1,247 @@
+ggml_cuda_init: found 1 CUDA devices (Total VRAM: 4095 MiB):
+  Device 0: NVIDIA GeForce RTX 2050, compute capability 8.6, VMM: yes, VRAM: 4095 MiB
+llama_model_load_from_file_impl: using device CUDA0 (NVIDIA GeForce RTX 2050) (0000:01:00.0) - 3301 MiB free
+llama_model_loader: loaded meta data with 30 key-value pairs and 39 tensors from ..\models\spinalcord_draft_f16.gguf (version GGUF V3 (latest))
+llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+llama_model_loader: - kv   0:                       general.architecture str              = llama
+llama_model_loader: - kv   1:                               general.type str              = model
+llama_model_loader: - kv   2:                               general.name str              = Hf_Export
+llama_model_loader: - kv   3:                         general.size_label str              = 42M
+llama_model_loader: - kv   4:                          llama.block_count u32              = 4
+llama_model_loader: - kv   5:                       llama.context_length u32              = 512
+llama_model_loader: - kv   6:                     llama.embedding_length u32              = 512
+llama_model_loader: - kv   7:                  llama.feed_forward_length u32              = 1024
+llama_model_loader: - kv   8:                 llama.attention.head_count u32              = 8
+llama_model_loader: - kv   9:              llama.attention.head_count_kv u32              = 4
+llama_model_loader: - kv  10:                       llama.rope.freq_base f32              = 10000.000000
+llama_model_loader: - kv  11:     llama.attention.layer_norm_rms_epsilon f32              = 0.000001
+llama_model_loader: - kv  12:                 llama.attention.key_length u32              = 64
+llama_model_loader: - kv  13:               llama.attention.value_length u32              = 64
+llama_model_loader: - kv  14:                          general.file_type u32              = 1
+llama_model_loader: - kv  15:                           llama.vocab_size u32              = 32000
+llama_model_loader: - kv  16:                 llama.rope.dimension_count u32              = 64
+llama_model_loader: - kv  17:               general.quantization_version u32              = 2
+llama_model_loader: - kv  18:                       tokenizer.ggml.model str              = llama
+llama_model_loader: - kv  19:                         tokenizer.ggml.pre str              = default
+llama_model_loader: - kv  20:                      tokenizer.ggml.tokens arr[str,32000]   = ["<unk>", "<s>", "</s>", "<0x00>", "<...
+llama_model_loader: - kv  21:                      tokenizer.ggml.scores arr[f32,32000]   = [-1000.000000, -1000.000000, -1000.00...
+llama_model_loader: - kv  22:                  tokenizer.ggml.token_type arr[i32,32000]   = [3, 3, 3, 6, 6, 6, 6, 6, 6, 6, 6, 6, ...
+llama_model_loader: - kv  23:                tokenizer.ggml.bos_token_id u32              = 1
+llama_model_loader: - kv  24:                tokenizer.ggml.eos_token_id u32              = 2
+llama_model_loader: - kv  25:            tokenizer.ggml.unknown_token_id u32              = 0
+llama_model_loader: - kv  26:            tokenizer.ggml.padding_token_id u32              = 2
+llama_model_loader: - kv  27:               tokenizer.ggml.add_bos_token bool             = true
+llama_model_loader: - kv  28:               tokenizer.ggml.add_sep_token bool             = false
+llama_model_loader: - kv  29:                    tokenizer.chat_template str              = {% for message in messages %}\n{% if m...
+llama_model_loader: - type  f32:    9 tensors
+llama_model_loader: - type  f16:   30 tensors
+print_info: file format = GGUF V3 (latest)
+print_info: file type   = F16
+print_info: file size   = 80.52 MiB (16.00 BPW) 
+init_tokenizer: initializing tokenizer for type 1
+load: 0 unused tokens
+load: control token:      0 '<unk>' is not marked as EOG
+load: control token:      1 '<s>' is not marked as EOG
+load: printing all EOG tokens:
+load:   - 2 ('</s>')
+load: special tokens cache size = 3
+load: token to piece cache size = 0.1684 MB
+print_info: arch                  = llama
+print_info: vocab_only            = 0
+print_info: no_alloc              = 0
+print_info: n_ctx_train           = 512
+print_info: n_embd                = 512
+print_info: n_embd_inp            = 512
+print_info: n_layer               = 4
+print_info: n_head                = 8
+print_info: n_head_kv             = 4
+print_info: n_rot                 = 64
+print_info: n_swa                 = 0
+print_info: is_swa_any            = 0
+print_info: n_embd_head_k         = 64
+print_info: n_embd_head_v         = 64
+print_info: n_gqa                 = 2
+print_info: n_embd_k_gqa          = 256
+print_info: n_embd_v_gqa          = 256
+print_info: f_norm_eps            = 0.0e+00
+print_info: f_norm_rms_eps        = 1.0e-06
+print_info: f_clamp_kqv           = 0.0e+00
+print_info: f_max_alibi_bias      = 0.0e+00
+print_info: f_logit_scale         = 0.0e+00
+print_info: f_attn_scale          = 0.0e+00
+print_info: n_ff                  = 1024
+print_info: n_expert              = 0
+print_info: n_expert_used         = 0
+print_info: n_expert_groups       = 0
+print_info: n_group_used          = 0
+print_info: causal attn           = 1
+print_info: pooling type          = 0
+print_info: rope type             = 0
+print_info: rope scaling          = linear
+print_info: freq_base_train       = 10000.0
+print_info: freq_scale_train      = 1
+print_info: n_ctx_orig_yarn       = 512
+print_info: rope_yarn_log_mul     = 0.0000
+print_info: rope_finetuned        = unknown
+print_info: model type            = ?B
+print_info: model params          = 42.21 M
+print_info: general.name          = Hf_Export
+print_info: vocab type            = SPM
+print_info: n_vocab               = 32000
+print_info: n_merges              = 0
+print_info: BOS token             = 1 '<s>'
+print_info: EOS token             = 2 '</s>'
+print_info: UNK token             = 0 '<unk>'
+print_info: PAD token             = 2 '</s>'
+print_info: LF token              = 13 '<0x0A>'
+print_info: EOG token             = 2 '</s>'
+print_info: max token length      = 48
+load_tensors: loading model tensors, this can take a while... (mmap = true, direct_io = false)
+load_tensors: layer   0 assigned to device CUDA0, is_swa = 0
+load_tensors: layer   1 assigned to device CUDA0, is_swa = 0
+load_tensors: layer   2 assigned to device CUDA0, is_swa = 0
+load_tensors: layer   3 assigned to device CUDA0, is_swa = 0
+load_tensors: layer   4 assigned to device CUDA0, is_swa = 0
+create_tensor: loading tensor token_embd.weight
+create_tensor: loading tensor output_norm.weight
+create_tensor: loading tensor output.weight
+create_tensor: loading tensor blk.0.attn_norm.weight
+create_tensor: loading tensor blk.0.attn_q.weight
+create_tensor: loading tensor blk.0.attn_k.weight
+create_tensor: loading tensor blk.0.attn_v.weight
+create_tensor: loading tensor blk.0.attn_output.weight
+create_tensor: loading tensor blk.0.ffn_norm.weight
+create_tensor: loading tensor blk.0.ffn_gate.weight
+create_tensor: loading tensor blk.0.ffn_down.weight
+create_tensor: loading tensor blk.0.ffn_up.weight
+create_tensor: loading tensor blk.1.attn_norm.weight
+create_tensor: loading tensor blk.1.attn_q.weight
+create_tensor: loading tensor blk.1.attn_k.weight
+create_tensor: loading tensor blk.1.attn_v.weight
+create_tensor: loading tensor blk.1.attn_output.weight
+create_tensor: loading tensor blk.1.ffn_norm.weight
+create_tensor: loading tensor blk.1.ffn_gate.weight
+create_tensor: loading tensor blk.1.ffn_down.weight
+create_tensor: loading tensor blk.1.ffn_up.weight
+create_tensor: loading tensor blk.2.attn_norm.weight
+create_tensor: loading tensor blk.2.attn_q.weight
+create_tensor: loading tensor blk.2.attn_k.weight
+create_tensor: loading tensor blk.2.attn_v.weight
+create_tensor: loading tensor blk.2.attn_output.weight
+create_tensor: loading tensor blk.2.ffn_norm.weight
+create_tensor: loading tensor blk.2.ffn_gate.weight
+create_tensor: loading tensor blk.2.ffn_down.weight
+create_tensor: loading tensor blk.2.ffn_up.weight
+create_tensor: loading tensor blk.3.attn_norm.weight
+create_tensor: loading tensor blk.3.attn_q.weight
+create_tensor: loading tensor blk.3.attn_k.weight
+create_tensor: loading tensor blk.3.attn_v.weight
+create_tensor: loading tensor blk.3.attn_output.weight
+create_tensor: loading tensor blk.3.ffn_norm.weight
+create_tensor: loading tensor blk.3.ffn_gate.weight
+create_tensor: loading tensor blk.3.ffn_down.weight
+create_tensor: loading tensor blk.3.ffn_up.weight
+done_getting_tensors: tensor 'token_embd.weight' (f16) (and 0 others) cannot be used with preferred buffer type CUDA_Host, using CPU instead
+load_tensors: offloading output layer to GPU
+load_tensors: offloading 3 repeating layers to GPU
+load_tensors: offloaded 5/5 layers to GPU
+load_tensors:   CPU_Mapped model buffer size =    31.25 MiB
+load_tensors:        CUDA0 model buffer size =    49.27 MiB
+......................
+llama_context: constructing llama_context
+llama_context: n_seq_max     = 1
+llama_context: n_ctx         = 2048
+llama_context: n_ctx_seq     = 2048
+llama_context: n_batch       = 512
+llama_context: n_ubatch      = 512
+llama_context: causal_attn   = 1
+llama_context: flash_attn    = auto
+llama_context: kv_unified    = false
+llama_context: freq_base     = 10000.0
+llama_context: freq_scale    = 1
+llama_context: n_ctx_seq (2048) > n_ctx_train (512) -- possible training context overflow
+set_abort_callback: call
+llama_context:  CUDA_Host  output buffer size =     0.12 MiB
+llama_kv_cache: layer   0: dev = CUDA0
+llama_kv_cache: layer   1: dev = CUDA0
+llama_kv_cache: layer   2: dev = CUDA0
+llama_kv_cache: layer   3: dev = CUDA0
+llama_kv_cache:      CUDA0 KV buffer size =     8.00 MiB
+llama_kv_cache: size =    8.00 MiB (  2048 cells,   4 layers,  1/1 seqs), K (f16):    4.00 MiB, V (f16):    4.00 MiB
+llama_context: enumerating backends
+llama_context: backend_ptrs.size() = 2
+sched_reserve: reserving ...
+sched_reserve: max_nodes = 1024
+sched_reserve: reserving full memory module
+sched_reserve: worst-case: n_tokens = 512, n_seqs = 1, n_outputs = 1
+graph_reserve: reserving a graph for ubatch with n_tokens =    1, n_seqs =  1, n_outputs =    1
+sched_reserve: Flash Attention was auto, set to enabled
+sched_reserve: resolving fused Gated Delta Net support:
+graph_reserve: reserving a graph for ubatch with n_tokens =    1, n_seqs =  1, n_outputs =    1
+sched_reserve: fused Gated Delta Net (autoregressive) enabled
+graph_reserve: reserving a graph for ubatch with n_tokens =   16, n_seqs =  1, n_outputs =   16
+sched_reserve: fused Gated Delta Net (chunked) enabled
+graph_reserve: reserving a graph for ubatch with n_tokens =  512, n_seqs =  1, n_outputs =  512
+graph_reserve: reserving a graph for ubatch with n_tokens =    1, n_seqs =  1, n_outputs =    1
+graph_reserve: reserving a graph for ubatch with n_tokens =  512, n_seqs =  1, n_outputs =  512
+sched_reserve:      CUDA0 compute buffer size =    63.50 MiB
+sched_reserve:  CUDA_Host compute buffer size =     6.01 MiB
+sched_reserve: graph nodes  = 131
+sched_reserve: graph splits = 2
+sched_reserve: reserve took 4.16 ms, sched copies = 1
+ggml_backend_cuda_graph_compute: CUDA graph warmup complete
+ggml_backend_cuda_graph_compute: CUDA graph warmup reset
+~llama_context:      CUDA0 compute buffer size is  63.5000 MiB, matches expectation of  63.5000 MiB
+~llama_context:  CUDA_Host compute buffer size is   6.0137 MiB, matches expectation of   6.0137 MiB
+
+╔══════════════════════════════════════════════════════╗
+║       🧠 SpinalCord LLM — Inference Engine          ║
+║            AppDice | Shivansh Darji                 ║
+╚══════════════════════════════════════════════════════╝
+
+[Init] Loading model: ..\models\spinalcord_draft_f16.gguf
+[Init] Model loaded! Layers: 4, Vocab: 32000
+
+[Prompt] "The spinal cord"
+[Prompt] Token count: 5
+
+━━━ 🔬 SPINAL CORD LAYER ANALYSIS ━━━━━━━━━━━━━━━━━━━━━━━━━━
+Watching confidence build up through the transformer layers...
+
+NOTE: Full layer hooks require custom llama.cpp modification.
+      Below shows final-layer analysis. See llama-model.cpp to add hooks.
+
+[Layer  4/ 4] Confidence:  70.7% [█████████████████████░░░░░░░░░] Entropy: 3.035
+
+━━━ 🎯 TOP TOKEN PREDICTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Top 1: <0x39>               | Prob: 14.93%
+  Top 2: <0x06>               | Prob: 13.86%
+  Top 3: <0x32>               | Prob: 6.61%
+  Top 4: <s>                  | Prob: 6.44%
+  Top 5: <0x3F>               | Prob: 6.26%
+
+━━━ ⚡ SPINAL CORD SPECULATIVE GENERATION (gamma=4) ━━━━━━━━━━
+The Draft Model generating next 4 tokens speculatively...
+
+[Draft Step 1] Token: <0x39>          | Confidence: 70.6%
+[Draft Step 2] Token: <0x46>          | Confidence: 86.5%
+[Draft Step 3] Token: <0x06>          | Confidence: 90.4%
+[Draft Step 4] Token: <s>             | Confidence: 93.2%
+
+[Draft Summary]
+  Tokens generated:    4
+  Average confidence:  85.2%
+  Time taken:          32 ms
+  Drafted text:        "<0x39><0x46><0x06><s>"
+
+━━━ 📊 SPINALCORD REPORT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Model:              ..\models\spinalcord_draft_f16.gguf
+  Prompt:             "The spinal cord"
+  Final Confidence:   93.2%
+  Final Entropy:      0.7079 nats (max=10.37)
+  Speculative Speed:  4 tokens in 32 ms (125.0 tok/s)
+
+╔══════════════════════════════════════════════╗
+║  🚀 SpinalCord Engine complete. AppDice.     ║
+╚══════════════════════════════════════════════╝
+

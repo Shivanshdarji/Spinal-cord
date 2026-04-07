@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SpinalCord — test console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --panel: #121212;
+      --border: #3d7a4a;
+      --border-dim: #2a4a32;
+      --text: #b8e0b8;
+      --muted: #6a8f6a;
+      --accent: #7fff7f;
+      --warn: #e8c84a;
+      --err: #ff6b6b;
+      --input-bg: #0a100c;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      font-size: 18px;
+      -webkit-font-smoothing: none;
+      -moz-osx-font-smoothing: unset;
+    }
+
+    body {
+      font-family: 'VT323', 'Courier New', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.35;
+      background-image:
+        linear-gradient(90deg, rgba(61, 122, 74, 0.04) 1px, transparent 1px),
+        linear-gradient(rgba(61, 122, 74, 0.04) 1px, transparent 1px);
+      background-size: 8px 8px;
+    }
+
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 12px 14px 28px; }
+
+    header {
+      border: 2px solid var(--border);
+      background: var(--panel);
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      color: var(--accent);
+      letter-spacing: 0.02em;
+      line-height: 1.6;
+    }
+
+    .tag {
+      font-size: 1rem;
+      color: var(--muted);
+      border: 2px solid var(--border-dim);
+      padding: 2px 8px;
+    }
+
+    h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem;
+      color: var(--accent);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--border-dim);
+    }
+
+    .panel {
+      border: 2px solid var(--border);
+      background: var(--panel);
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+    .grow { flex: 1; min-width: 140px; }
+
+    label { color: var(--muted); font-size: 1.05rem; }
+    label.inline { display: inline-flex; align-items: center; gap: 6px; }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      font-family: 'VT323', monospace;
+      font-size: 1.1rem;
+      background: var(--input-bg);
+      color: var(--accent);
+      border: 2px solid var(--border-dim);
+      padding: 6px 8px;
+      width: 100%;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.38rem;
+      padding: 10px 12px;
+      border: 2px solid var(--accent);
+      background: var(--input-bg);
+      color: var(--accent);
+      cursor: pointer;
+      line-height: 1.4;
+    }
+
+    .btn:hover { background: #1a2a1a; }
+    .btn:active { transform: translate(1px, 1px); }
+
+    .hint {
+      font-size: 0.95rem;
+      color: var(--muted);
+      border-left: 3px solid var(--border-dim);
+      padding: 6px 0 6px 10px;
+      margin: 6px 0 10px;
+    }
+
+    .model-box {
+      border: 2px solid var(--border-dim);
+      background: var(--input-bg);
+      padding: 8px;
+      margin-bottom: 8px;
+      max-height: 160px;
+      overflow: auto;
+      font-size: 0.95rem;
+    }
+
+    .chat-log {
+      border: 2px solid var(--border-dim);
+      background: #080808;
+      min-height: 200px;
+      max-height: 360px;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 0;
+    }
+
+    .bubble-user {
+      align-self: flex-end;
+      border: 2px solid var(--border);
+      padding: 8px 10px;
+      max-width: 88%;
+      word-break: break-word;
+    }
+
+    .bubble-ai {
+      align-self: flex-start;
+      border: 2px solid var(--border-dim);
+      padding: 8px 10px;
+      max-width: 88%;
+      word-break: break-word;
+    }
+
+    .sampling {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      align-items: center;
+      padding: 8px;
+      border: 2px solid var(--border-dim);
+      border-top: none;
+      font-size: 1rem;
+    }
+
+    .chat-input-row {
+      display: flex;
+      border: 2px solid var(--border-dim);
+      border-top: none;
+      background: #080808;
+    }
+
+    .chat-input-row input {
+      border: none;
+      flex: 1;
+    }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 720px) {
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+
+    .col {
+      border: 2px solid var(--border-dim);
+      padding: 8px;
+    }
+
+    .col.baseline h3 { color: var(--warn); }
+    .col.spec h3 { color: var(--accent); }
+
+    h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.35rem;
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .out-box {
+      min-height: 120px;
+      max-height: 220px;
+      overflow: auto;
+      border: 2px solid var(--border-dim);
+      background: #080808;
+      padding: 8px;
+      font-size: 0.95rem;
+      margin-top: 6px;
+    }
+
+    .status { font-size: 0.95rem; color: var(--muted); margin: 4px 0; }
+
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    code { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>SPINALCORD<br>TEST</h1>
+      <div class="tag" id="chat-speed">tok/s: —</div>
+      <div class="tag" id="chat-status">ready</div>
+    </header>
+
+    <!-- A/B -->
+    <section class="panel">
+      <h2>A / B (baseline vs speculative)</h2>
+      <p class="hint">Same prompt, two servers. Baseline = brain-only port. Speculative = brain + draft port. LAN: <code>HOST=0.0.0.0</code> + firewall on <strong>both</strong> ports.</p>
+      <p class="hint"><strong>Why baseline looks faster in parallel:</strong> both columns hit the <strong>same GPU</strong> at once. Brain-only is lighter, so it often streams first while speculative (brain+draft) waits and can dump text in bursts. Enable <em>spec first</em> below so SpinalCord runs with the GPU to itself, then baseline.</p>
+
+      <div class="row">
+        <label>profile</label>
+        <select id="cmp-profile" class="grow" style="max-width:420px">
+          <option value="spinalcord_custom">custom scbrain</option>
+          <option value="llama_scaffold">llama 3.2 scaffold</option>
+        </select>
+        <button type="button" class="btn" onclick="applyCompareProfile()">apply</button>
+        <label class="inline"><input type="checkbox" id="cmp-stateless" checked /> stateless</label>
+        <label class="inline" title="Runs speculative first, then baseline — one GPU is not split between two heavy jobs"><input type="checkbox" id="cmp-sequential" checked /> spec first (no GPU fight)</label>
+      </div>
+
+      <div class="compare-grid">
+        <div class="col baseline">
+          <h3>baseline</h3>
+          <div class="row">
+            <input id="cmp-base-endpoint" type="text" value="http://127.0.0.1:8081" placeholder="url" />
+          </div>
+          <div class="row">
+            <input id="cmp-base-model" type="text" placeholder="model id (auto if empty)" />
+          </div>
+          <div class="status" id="cmp-base-status">idle</div>
+          <div class="out-box" id="cmp-base-box">…</div>
+        </div>
+        <div class="col spec">
+          <h3>speculative</h3>
+          <div class="row">
+            <input id="cmp-sc-endpoint" type="text" value="http://127.0.0.1:8080" placeholder="url" />
+          </div>
+          <div class="row">
+            <input id="cmp-sc-model" type="text" placeholder="model id (auto if empty)" />
+          </div>
+          <div class="status" id="cmp-sc-status">idle</div>
+          <div class="out-box" id="cmp-sc-box">…</div>
+        </div>
+      </div>
+
+      <div class="chat-input-row" style="margin-top:10px; border:2px solid var(--border-dim);">
+        <input type="text" id="cmp-input" placeholder="prompt → both" onkeypress="if(event.key==='Enter')sendCompare()" />
+        <button type="button" class="btn" onclick="sendCompare()" id="btn-compare-send">send×2</button>
+      </div>
+    </section>
+
+    <!-- Single chat -->
+    <section class="panel">
+      <h2>single chat</h2>
+      <div class="hint" id="chat-model-hint">loading models…</div>
+
+      <div class="row">
+        <label class="grow" style="min-width:120px">endpoint</label>
+        <input id="chat-endpoint" type="text" value="http://127.0.0.1:8080" class="grow" />
+        <button type="button" class="btn" onclick="applyChatEndpoint()">use</button>
+        <button type="button" class="btn" onclick="loadModelIdPanel()">refresh</button>
+      </div>
+
+      <div class="model-box" id="model-id-list"></div>
+
+      <div class="sampling">
+        <label class="inline">temp <input type="number" id="chat-temp" min="0" max="2" step="0.05" value="0.2" style="width:4.5rem" /></label>
+        <label class="inline">max <input type="number" id="chat-max-tokens" min="16" max="4096" step="16" value="256" style="width:4.5rem" /></label>
+        <label class="inline">repeat <input type="number" id="chat-repeat" min="1" max="2" step="0.05" value="1.15" style="width:4rem" /></label>
+        <button type="button" class="btn" onclick="resetChatSamplingDefaults()">defaults</button>
+      </div>
+
+      <div class="chat-log" id="chat-window">
+        <div style="color:var(--muted);text-align:center;padding:20px;">message llama-server</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="type…" onkeypress="if(event.key==='Enter')sendChat()" />
+        <button type="button" class="btn" onclick="sendChat()" id="btn-send">send</button>
+      </div>
+    </section>
+
+    <footer>llama-server · <code>/v1/chat/completions</code></footer>
+  </div>
+
+<script>
+let messageHistory = [
+  {"role": "system", "content": "You are a concise assistant. Answer directly."}
+];
+let compareBaseHistory = [
+  {"role": "system", "content": "You are a concise assistant. Answer directly and clearly."}
+];
+let compareSpinalHistory = [
+  {"role": "system", "content": "You are a concise assistant. Answer directly and clearly."}
+];
+const compareProfiles = {
+  spinalcord_custom: {
+    label: "SCBrain custom",
+    model_id: "scbrain_1b.gguf",
+    base_endpoint: "http://127.0.0.1:8081",
+    sc_endpoint: "http://127.0.0.1:8080"
+  },
+  llama_scaffold: {
+    label: "Llama scaffold",
+    model_id: "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    base_endpoint: "http://127.0.0.1:8081",
+    sc_endpoint: "http://127.0.0.1:8080"
+  }
+};
+let isGenerating = false;
+let oaiModelName = null;
+const LS_MODEL_ID = 'spinalcord_llama_model_id';
+const LS_CHAT_ENDPOINT = 'spinalcord_chat_endpoint';
+const LS_CHAT_TEMP = 'spinalcord_chat_temp';
+const LS_CHAT_MAX_TOK = 'spinalcord_chat_max_tokens';
+const LS_CHAT_REPEAT = 'spinalcord_chat_repeat_penalty';
+
+function parseFloatSafe(v, fallback) {
+  var n = parseFloat(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+function parseIntSafe(v, fallback) {
+  var n = parseInt(v, 10);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function loadChatSamplingFromStorage() {
+  try {
+    var t = document.getElementById('chat-temp');
+    var m = document.getElementById('chat-max-tokens');
+    var r = document.getElementById('chat-repeat');
+    if (!t || !m || !r) return;
+    var st = localStorage.getItem(LS_CHAT_TEMP);
+    var sm = localStorage.getItem(LS_CHAT_MAX_TOK);
+    var sr = localStorage.getItem(LS_CHAT_REPEAT);
+    if (st != null) t.value = String(parseFloatSafe(st, 0.2));
+    if (sm != null) m.value = String(parseIntSafe(sm, 256));
+    if (sr != null) r.value = String(parseFloatSafe(sr, 1.15));
+  } catch (e) { /* ignore */ }
+}
+
+function saveChatSamplingToStorage() {
+  try {
+    var t = document.getElementById('chat-temp');
+    var m = document.getElementById('chat-max-tokens');
+    var r = document.getElementById('chat-repeat');
+    if (!t || !m || !r) return;
+    localStorage.setItem(LS_CHAT_TEMP, t.value);
+    localStorage.setItem(LS_CHAT_MAX_TOK, m.value);
+    localStorage.setItem(LS_CHAT_REPEAT, r.value);
+  } catch (e) { /* ignore */ }
+}
+
+function getChatSamplingBodyFields() {
+  var t = document.getElementById('chat-temp');
+  var m = document.getElementById('chat-max-tokens');
+  var r = document.getElementById('chat-repeat');
+  var temp = t ? parseFloatSafe(t.value, 0.2) : 0.2;
+  var maxTok = m ? parseIntSafe(m.value, 256) : 256;
+  var rep = r ? parseFloatSafe(r.value, 1.15) : 1.15;
+  temp = Math.max(0, Math.min(2, temp));
+  maxTok = Math.max(16, Math.min(8192, maxTok));
+  rep = Math.max(1, Math.min(2, rep));
+  return { temperature: temp, max_tokens: maxTok, repeat_penalty: rep };
+}
+
+function resetChatSamplingDefaults() {
+  var t = document.getElementById('chat-temp');
+  var m = document.getElementById('chat-max-tokens');
+  var r = document.getElementById('chat-repeat');
+  if (t) t.value = '0.2';
+  if (m) m.value = '256';
+  if (r) r.value = '1.15';
+  saveChatSamplingToStorage();
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function normalizeModelId(raw) {
+  if (raw == null) return null;
+  var s = String(raw).trim();
+  if (s.length >= 2 && s.charAt(0) === '<' && s.charAt(s.length - 1) === '>') {
+    s = s.slice(1, -1).trim();
+  }
+  return s.length ? s : null;
+}
+
+function modelIdFromUrl() {
+  try {
+    const q = new URLSearchParams(window.location.search).get('model');
+    if (q && String(q).trim()) return normalizeModelId(q);
+  } catch (e) { /* ignore */ }
+  return null;
+}
+
+function modelIdFromStorage() {
+  try {
+    const s = localStorage.getItem(LS_MODEL_ID);
+    return s && s.trim() ? normalizeModelId(s) : null;
+  } catch (e) { return null; }
+}
+
+function saveModelIdToStorage(id) {
+  try {
+    var n = normalizeModelId(id);
+    if (n) localStorage.setItem(LS_MODEL_ID, n);
+  } catch (e) { /* ignore */ }
+}
+
+function normalizeEndpoint(raw) {
+  var s = String(raw || '').trim();
+  if (!s) return window.location.origin;
+  if (!/^https?:\/\//i.test(s)) s = 'http://' + s;
+  s = s.replace(/\/+$/, '');
+  return s;
+}
+
+function isLoopbackHost(h) {
+  if (!h) return true;
+  var x = String(h).toLowerCase();
+  return x === 'localhost' || x === '127.0.0.1' || x === '[::1]';
+}
+
+function endpointHostIsLoopback(raw) {
+  try {
+    var u = new URL(normalizeEndpoint(raw));
+    return isLoopbackHost(u.hostname);
+  } catch (e) {
+    return true;
+  }
+}
+
+/** Replace 127.0.0.1 in compare URLs with the host you used to open this page (second device on LAN). */
+function syncCompareEndpointsToPageHost(pageHost) {
+  if (isLoopbackHost(pageHost)) return;
+  ['cmp-base-endpoint', 'cmp-sc-endpoint'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (!el || !String(el.value || '').trim()) return;
+    try {
+      var u = new URL(normalizeEndpoint(el.value));
+      if (isLoopbackHost(u.hostname)) {
+        u.hostname = pageHost;
+        el.value = u.origin;
+      }
+    } catch (e) { /* ignore */ }
+  });
+}
+
+function getChatEndpoint() {
+  var input = document.getElementById('chat-endpoint');
+  if (input && String(input.value || '').trim()) return normalizeEndpoint(input.value);
+  try {
+    var st = localStorage.getItem(LS_CHAT_ENDPOINT);
+    if (st && st.trim()) return normalizeEndpoint(st);
+  } catch (e) { /* ignore */ }
+  return window.location.origin;
+}
+
+function setChatEndpoint(v) {
+  var ep = normalizeEndpoint(v);
+  var input = document.getElementById('chat-endpoint');
+  if (input) input.value = ep;
+  try { localStorage.setItem(LS_CHAT_ENDPOINT, ep); } catch (e) { /* ignore */ }
+  return ep;
+}
+
+function applyChatEndpoint() {
+  var ep = getChatEndpoint();
+  setChatEndpoint(ep);
+  updateChatModelHint(ep + ' — loading…', false);
+  loadModelIdPanel();
+}
+
+function modelsJsonToEntries(j) {
+  var raw = [];
+  if (Array.isArray(j.data)) raw = j.data;
+  else if (Array.isArray(j.models)) raw = j.models;
+  if (!raw.length && j.data && typeof j.data === 'object' && !Array.isArray(j.data)) raw = [j.data];
+  if (!raw.length && j.object === 'list' && Array.isArray(j.data)) raw = j.data;
+  return raw.map(function (m) {
+    if (m == null || typeof m !== 'object') return { id: '', m: m };
+    var id = m.id != null ? String(m.id) : (m.name != null ? String(m.name) : (m.model != null ? String(m.model) : ''));
+    return { id: id, m: m };
+  }).filter(function (e) { return e.id.length > 0; });
+}
+
+function pickPreferredBrain(entries) {
+  var prefer = entries.find(function (e) {
+    var id = e.id.toLowerCase();
+    return id.indexOf('scbrain') >= 0 || (id.indexOf('brain') >= 0 && id.indexOf('draft') < 0);
+  });
+  return (prefer || entries[0]).id;
+}
+
+function updateChatModelHint(text, isErr) {
+  var el = document.getElementById('chat-model-hint');
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = isErr ? 'var(--err)' : 'var(--muted)';
+}
+
+function labelModelRole(id) {
+  var s = String(id).toLowerCase();
+  if (s.indexOf('draft') >= 0) return 'draft';
+  if (s.indexOf('scbrain') >= 0 || (s.indexOf('brain') >= 0 && s.indexOf('draft') < 0)) return 'brain';
+  return 'model';
+}
+
+async function loadModelIdPanel() {
+  var endpoint = getChatEndpoint();
+  var listEl = document.getElementById('model-id-list');
+  if (listEl) listEl.innerHTML = '<span style="color:var(--muted)">loading…</span>';
+  try {
+    var r = await fetch(endpoint + '/v1/models');
+    if (!r.ok) {
+      oaiModelName = null;
+      if (listEl) {
+        listEl.innerHTML = '<span style="color:var(--err)">GET /v1/models ' + r.status + ' @ ' + escapeHtml(endpoint) + '</span>';
+      }
+      updateChatModelHint('no /v1/models', true);
+      return null;
+    }
+    var j = await r.json();
+    var entries = modelsJsonToEntries(j);
+    if (!entries.length) {
+      oaiModelName = null;
+      if (listEl) listEl.innerHTML = '<span style="color:var(--err)">empty model list</span>';
+      updateChatModelHint('no models in JSON', true);
+      return null;
+    }
+    oaiModelName = pickPreferredBrain(entries);
+    updateChatModelHint(endpoint + ' · ' + oaiModelName, false);
+
+    if (listEl) {
+      listEl.innerHTML = '';
+      entries.forEach(function (e) {
+        var id = e.id;
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border-dim);';
+        var lbl = document.createElement('span');
+        lbl.style.cssText = 'color:var(--warn);min-width:3.5rem;';
+        lbl.textContent = labelModelRole(id);
+        var code = document.createElement('code');
+        code.style.cssText = 'flex:1;min-width:0;word-break:break-all;';
+        code.textContent = id;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn';
+        btn.style.fontSize = '0.32rem';
+        btn.textContent = 'use';
+        btn.addEventListener('click', function () { setChatModelId(id); });
+        row.appendChild(lbl);
+        row.appendChild(code);
+        row.appendChild(btn);
+        listEl.appendChild(row);
+      });
+    }
+    return oaiModelName;
+  } catch (err) {
+    oaiModelName = null;
+    if (listEl) listEl.innerHTML = '<span style="color:var(--err)">' + escapeHtml(String(err)) + '</span>';
+    updateChatModelHint('fetch error', true);
+    return null;
+  }
+}
+
+function setChatModelId(id) {
+  oaiModelName = normalizeModelId(id) || String(id).trim();
+  saveModelIdToStorage(oaiModelName);
+  updateChatModelHint('model: ' + oaiModelName, false);
+  try {
+    var u = new URL(window.location.href);
+    u.searchParams.set('model', oaiModelName);
+    window.history.replaceState({}, '', u.toString());
+  } catch (e) { /* ignore */ }
+}
+
+async function refreshOaiModelNameFromServer() {
+  await loadModelIdPanel();
+  return oaiModelName;
+}
+
+async function getChatModelId() {
+  var urlId = modelIdFromUrl();
+  if (urlId) return urlId;
+  var stored = modelIdFromStorage();
+  if (stored) return stored;
+  if (oaiModelName) return normalizeModelId(oaiModelName) || oaiModelName;
+  await refreshOaiModelNameFromServer();
+  return oaiModelName;
+}
+
+async function postChatCompletions(modelId) {
+  var endpoint = getChatEndpoint();
+  var samp = getChatSamplingBodyFields();
+  const body = JSON.stringify({
+    model: modelId,
+    messages: messageHistory,
+    stream: true,
+    temperature: samp.temperature,
+    max_tokens: samp.max_tokens,
+    repeat_penalty: samp.repeat_penalty
+  });
+  const headers = { 'Content-Type': 'application/json' };
+  const paths = ['/v1/chat/completions', '/chat/completions'];
+  var last;
+  for (var i = 0; i < paths.length; i++) {
+    last = await fetch(endpoint + paths[i], { method: 'POST', headers: headers, body: body });
+    if (last.status !== 404 || i === paths.length - 1) return last;
+  }
+  return last;
+}
+
+async function fetchModelsFromEndpoint(endpoint) {
+  var base = String(endpoint || '').trim().replace(/\/+$/, '');
+  var r = await fetch(base + '/v1/models');
+  if (!r.ok) throw new Error('GET /v1/models failed HTTP ' + r.status + ' @ ' + base);
+  var j = await r.json();
+  var entries = modelsJsonToEntries(j);
+  if (!entries.length) throw new Error('No models found @ ' + base);
+  return entries;
+}
+
+async function resolveModelIdForEndpoint(endpoint, manual) {
+  var m = (manual || '').trim();
+  if (m) return m;
+  var entries = await fetchModelsFromEndpoint(endpoint);
+  return pickPreferredBrain(entries);
+}
+
+async function postCompareChat(endpoint, modelId, history, sampling) {
+  var base = String(endpoint || '').trim().replace(/\/+$/, '');
+  var body = JSON.stringify({
+    model: modelId,
+    messages: history,
+    stream: true,
+    temperature: sampling.temperature,
+    max_tokens: sampling.max_tokens,
+    repeat_penalty: sampling.repeat_penalty
+  });
+  var headers = { 'Content-Type': 'application/json' };
+  var paths = ['/v1/chat/completions', '/chat/completions'];
+  var last;
+  for (var i = 0; i < paths.length; i++) {
+    last = await fetch(base + paths[i], { method: 'POST', headers: headers, body: body });
+    if (last.status !== 404 || i === paths.length - 1) return last;
+  }
+  return last;
+}
+
+async function runOneCompare(side, userText) {
+  var endpointEl = document.getElementById(side === 'base' ? 'cmp-base-endpoint' : 'cmp-sc-endpoint');
+  var modelEl = document.getElementById(side === 'base' ? 'cmp-base-model' : 'cmp-sc-model');
+  var statusEl = document.getElementById(side === 'base' ? 'cmp-base-status' : 'cmp-sc-status');
+  var boxEl = document.getElementById(side === 'base' ? 'cmp-base-box' : 'cmp-sc-box');
+
+  var endpoint = endpointEl ? endpointEl.value : '';
+  var manualModel = modelEl ? modelEl.value : '';
+  var sampling = getChatSamplingBodyFields();
+  var history = side === 'base' ? compareBaseHistory : compareSpinalHistory;
+  var instantMode = !!(document.getElementById('cmp-stateless') && document.getElementById('cmp-stateless').checked);
+  var reqHistory = instantMode
+    ? [
+        {"role": "system", "content": "You are a concise assistant. Answer directly and clearly."},
+        {"role": "user", "content": userText}
+      ]
+    : history;
+  var t0 = performance.now();
+  var tokenCount = 0;
+
+  if (statusEl) statusEl.textContent = 'resolving model…';
+  try {
+    var modelId = await resolveModelIdForEndpoint(endpoint, manualModel);
+    if (modelEl && (!manualModel || !manualModel.trim())) modelEl.value = modelId;
+    if (statusEl) statusEl.textContent = (side === 'sc' ? '[spec] ' : '[base] ') + modelId;
+
+    var response = await postCompareChat(endpoint, modelId, reqHistory, sampling);
+    if (!response.ok) {
+      var errTxt = await response.text();
+      throw new Error('HTTP ' + response.status + ': ' + errTxt.slice(0, 500));
+    }
+
+    var full = '';
+    var ct = (response.headers && response.headers.get('content-type')) || '';
+    var looksLikeJson = ct.indexOf('application/json') >= 0;
+    if (looksLikeJson) {
+      var j = await response.json();
+      var msg = j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content;
+      full = msg ? String(msg) : '';
+      if (boxEl) boxEl.innerHTML = escapeHtml(full).replace(/\n/g, '<br>');
+    } else {
+      var reader = response.body.getReader();
+      var decoder = new TextDecoder();
+      while (true) {
+        var part = await reader.read();
+        if (part.done) break;
+        var lines = decoder.decode(part.value).split('\n');
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i];
+          if (!line.startsWith('data: ')) continue;
+          if (line === 'data: [DONE]') continue;
+          try {
+            var d = JSON.parse(line.slice(6));
+            var delta = d.choices && d.choices[0] && d.choices[0].delta && d.choices[0].delta.content;
+            if (delta) {
+              full += delta;
+              tokenCount++;
+              if (boxEl) {
+                boxEl.innerHTML = escapeHtml(full).replace(/\n/g, '<br>');
+                boxEl.scrollTop = boxEl.scrollHeight;
+              }
+            }
+          } catch (e2) { /* ignore */ }
+        }
+      }
+    }
+
+    if (!instantMode) {
+      history.push({ role: 'assistant', content: full });
+    }
+    var dt = (performance.now() - t0) / 1000;
+    var tps = tokenCount > 0 && dt > 0 ? (tokenCount / dt).toFixed(1) : 'n/a';
+    if (statusEl) statusEl.innerHTML = dt.toFixed(2) + 's · ~' + tps + ' tok/s';
+  } catch (err) {
+    var raw = String(err && err.message ? err.message : err);
+    var netFail =
+      raw.indexOf('Failed to fetch') >= 0 ||
+      raw.indexOf('NetworkError') >= 0 ||
+      raw.indexOf('Load failed') >= 0;
+    var tag = side === 'base' ? 'Baseline ' : 'Speculative ';
+    var hint =
+      netFail
+        ? ' On the host PC, start this backend with HOST=0.0.0.0 (not 127.0.0.1 only). Open Windows Firewall for this port. URL tried: ' + String(endpoint || '').trim()
+        : '';
+    throw new Error(tag + raw + hint);
+  }
+}
+
+async function sendCompare() {
+  var input = document.getElementById('cmp-input');
+  var btn = document.getElementById('btn-compare-send');
+  var text = input ? input.value.trim() : '';
+  if (!text) return;
+  if (btn) btn.textContent = '…';
+  if (input) input.value = '';
+
+  var baseBox = document.getElementById('cmp-base-box');
+  var scBox = document.getElementById('cmp-sc-box');
+  var baseStatus = document.getElementById('cmp-base-status');
+  var scStatus = document.getElementById('cmp-sc-status');
+  if (baseBox) baseBox.innerHTML = '';
+  if (scBox) scBox.innerHTML = '';
+  if (baseStatus) baseStatus.textContent = '…';
+  if (scStatus) scStatus.textContent = '…';
+
+  var instantMode = !!(document.getElementById('cmp-stateless') && document.getElementById('cmp-stateless').checked);
+  if (!instantMode) {
+    compareBaseHistory.push({ role: 'user', content: text });
+    compareSpinalHistory.push({ role: 'user', content: text });
+  }
+
+  function rejMsg(r) {
+    if (!r || r.status !== 'rejected' || r.reason == null) return '';
+    var x = r.reason;
+    return escapeHtml(x && x.message ? String(x.message) : String(x));
+  }
+  function applyCompareResults(results) {
+    if (results[0].status === 'rejected' && baseStatus) {
+      baseStatus.innerHTML = '<span style="color:var(--err)">' + rejMsg(results[0]) + '</span>';
+    }
+    if (results[1].status === 'rejected' && scStatus) {
+      scStatus.innerHTML = '<span style="color:var(--err)">' + rejMsg(results[1]) + '</span>';
+    }
+  }
+
+  var sequential = !!(document.getElementById('cmp-sequential') && document.getElementById('cmp-sequential').checked);
+  if (sequential) {
+    if (baseStatus) baseStatus.textContent = 'queued (runs after spec)';
+    var rSc = await Promise.allSettled([runOneCompare('sc', text)]);
+    if (rSc[0].status === 'rejected' && scStatus) {
+      scStatus.innerHTML = '<span style="color:var(--err)">' + rejMsg(rSc[0]) + '</span>';
+    }
+    if (baseStatus) baseStatus.textContent = '…';
+    var rBase = await Promise.allSettled([runOneCompare('base', text)]);
+    if (rBase[0].status === 'rejected' && baseStatus) {
+      baseStatus.innerHTML = '<span style="color:var(--err)">' + rejMsg(rBase[0]) + '</span>';
+    }
+  } else {
+    await Promise.allSettled([
+      runOneCompare('base', text),
+      runOneCompare('sc', text)
+    ]).then(applyCompareResults);
+  }
+
+  if (btn) btn.textContent = 'send×2';
+}
+
+function applyCompareProfile() {
+  var sel = document.getElementById('cmp-profile');
+  var key = sel ? String(sel.value || '').trim() : '';
+  var p = compareProfiles[key];
+  if (!p) return;
+
+  var baseEndpoint = document.getElementById('cmp-base-endpoint');
+  var scEndpoint = document.getElementById('cmp-sc-endpoint');
+  var baseModel = document.getElementById('cmp-base-model');
+  var scModel = document.getElementById('cmp-sc-model');
+  var baseStatus = document.getElementById('cmp-base-status');
+  var scStatus = document.getElementById('cmp-sc-status');
+  var baseBox = document.getElementById('cmp-base-box');
+  var scBox = document.getElementById('cmp-sc-box');
+
+  if (baseEndpoint) baseEndpoint.value = p.base_endpoint;
+  if (scEndpoint) scEndpoint.value = p.sc_endpoint;
+  if (baseModel) baseModel.value = p.model_id;
+  if (scModel) scModel.value = p.model_id;
+
+  var maxTokEl = document.getElementById('chat-max-tokens');
+  var tempEl = document.getElementById('chat-temp');
+  if (maxTokEl) maxTokEl.value = '128';
+  if (tempEl) tempEl.value = '0.2';
+  saveChatSamplingToStorage();
+
+  compareBaseHistory = [
+    {"role": "system", "content": "You are a concise assistant. Answer directly and clearly."}
+  ];
+  compareSpinalHistory = [
+    {"role": "system", "content": "You are a concise assistant. Answer directly and clearly."}
+  ];
+  if (baseBox) baseBox.innerHTML = '…';
+  if (scBox) scBox.innerHTML = '…';
+  if (baseStatus) baseStatus.textContent = p.label + ' · base ' + p.base_endpoint;
+  if (scStatus) scStatus.textContent = p.label + ' · spec ' + p.sc_endpoint;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text || isGenerating) return;
+
+  const chatWindow = document.getElementById('chat-window');
+  if (!chatWindow) return;
+
+  if (messageHistory.length === 1) chatWindow.innerHTML = '';
+
+  chatWindow.innerHTML += '<div class="bubble-user">' + escapeHtml(text) + '</div>';
+
+  messageHistory.push({"role": "user", "content": text});
+  input.value = '';
+  isGenerating = true;
+  var btnSend = document.getElementById('btn-send');
+  if (btnSend) btnSend.textContent = '…';
+  var st = document.getElementById('chat-status');
+  if (st) st.textContent = 'busy';
+
+  const aiBubbleId = 'ai-msg-' + Date.now();
+  chatWindow.innerHTML += '<div class="bubble-ai" id="' + aiBubbleId + '"></div>';
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+  const aiBubble = document.getElementById(aiBubbleId);
+
+  try {
+    const t0 = performance.now();
+    let tokenCount = 0;
+
+    let modelId = await getChatModelId();
+    if (!modelId) {
+      aiBubble.innerHTML =
+        '<span style="color:var(--err)">no model id</span><br>' +
+        '<span style="color:var(--muted)">?model= from /v1/models</span>';
+      updateChatModelHint('set ?model=', true);
+      return;
+    }
+
+    updateChatModelHint(modelId, false);
+
+    let response = await postChatCompletions(modelId);
+    let lastErrBody = '';
+
+    if (!response.ok) {
+      lastErrBody = await response.text();
+      var lb = lastErrBody.toLowerCase();
+      var retry =
+        response.status === 404 ||
+        (response.status === 400 && (lb.indexOf('not found') >= 0 || lb.indexOf('unknown') >= 0)) ||
+        lb.indexOf('"not_found_error"') >= 0 ||
+        lb.indexOf('not_found_error') >= 0;
+      if (retry) {
+        try { localStorage.removeItem(LS_MODEL_ID); } catch (e) {}
+        oaiModelName = null;
+        await refreshOaiModelNameFromServer();
+        modelId = await getChatModelId();
+        if (modelId) {
+          updateChatModelHint('retry ' + modelId, false);
+          response = await postChatCompletions(modelId);
+          if (!response.ok) lastErrBody = await response.text();
+        }
+      }
+    }
+
+    if (!response.ok) {
+      let detail = lastErrBody;
+      try {
+        const j = JSON.parse(lastErrBody);
+        if (j.error) {
+          var em = j.error.message || '';
+          var ec = j.error.code != null ? ' (code ' + j.error.code + ')' : '';
+          var et = j.error.type ? ' [' + j.error.type + ']' : '';
+          detail = em + ec + et;
+        } else {
+          detail = JSON.stringify(j);
+        }
+      } catch (e) { /* keep raw */ }
+      var hint404 =
+        response.status === 404
+          ? '404: wrong route or GET on POST-only path. '
+          : '';
+      aiBubble.innerHTML =
+        '<span style="color:var(--err)">HTTP ' + response.status + '</span><br>' +
+        '<span style="color:var(--muted)">' + escapeHtml(String(detail).slice(0, 1200)) + '</span><br>' +
+        '<span style="color:var(--muted);font-size:0.9rem">' + hint404 + '--jinja for custom GGUF.</span>';
+      updateChatModelHint('error', true);
+      return;
+    }
+
+    saveModelIdToStorage(modelId);
+
+    if (!response.body) {
+      aiBubble.innerHTML = '<span style="color:var(--err)">no body</span>';
+      return;
+    }
+
+    const ct = (response.headers && response.headers.get('content-type')) || '';
+    const looksLikeJson = ct.indexOf('application/json') >= 0;
+
+    let fullResponse = '';
+
+    if (looksLikeJson) {
+      try {
+        const j = await response.json();
+        var msg =
+          j.choices &&
+          j.choices[0] &&
+          (j.choices[0].message && j.choices[0].message.content != null
+            ? j.choices[0].message.content
+            : j.choices[0].text);
+        fullResponse = msg != null ? String(msg) : '';
+        if (!fullResponse) {
+          aiBubble.innerHTML = '<span style="color:var(--err)">empty</span>';
+        } else {
+          aiBubble.innerHTML = escapeHtml(fullResponse).replace(/\n/g, '<br>');
+          tokenCount = fullResponse.length > 0 ? 32 : 0;
+          const elapsed = (performance.now() - t0) / 1000;
+          var spd = document.getElementById('chat-speed');
+          if (elapsed > 0 && spd) spd.textContent = '~' + (tokenCount / elapsed).toFixed(1) + ' tok/s';
+        }
+      } catch (parseErr) {
+        aiBubble.innerHTML = '<span style="color:var(--err)">bad JSON</span>';
+      }
+    } else {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            if (line === 'data: [DONE]') continue;
+            try {
+              const data = JSON.parse(line.slice(6));
+              var delta = data.choices && data.choices[0] && data.choices[0].delta;
+              if (delta && delta.content) {
+                fullResponse += delta.content;
+                aiBubble.innerHTML = escapeHtml(fullResponse).replace(/\n/g, '<br>');
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                tokenCount++;
+
+                const elapsed = (performance.now() - t0) / 1000;
+                if (elapsed > 0) {
+                  const speed = (tokenCount / elapsed).toFixed(1);
+                  var cs = document.getElementById('chat-speed');
+                  if (cs) cs.textContent = speed + ' tok/s';
+                }
+              }
+            } catch (e) { /* ignore */ }
+          }
+        }
+      }
+
+      if (!fullResponse.trim()) {
+        aiBubble.innerHTML = '<span style="color:var(--muted)">empty stream</span>';
+      }
+    }
+
+    messageHistory.push({ role: 'assistant', content: fullResponse });
+
+  } catch (error) {
+    console.error('sendChat', error);
+    aiBubble.innerHTML =
+      '<span style="color:var(--err)">error</span> ' +
+      escapeHtml(String(error && error.message ? error.message : error));
+  }
+
+  isGenerating = false;
+  if (btnSend) btnSend.textContent = 'send';
+  if (st) st.textContent = 'ready';
+}
+
+window.addEventListener('DOMContentLoaded', function () {
+  loadChatSamplingFromStorage();
+  ['chat-temp', 'chat-max-tokens', 'chat-repeat'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', saveChatSamplingToStorage);
+      el.addEventListener('blur', saveChatSamplingToStorage);
+    }
+  });
+
+  (function initEndpointForDevice() {
+    try {
+      var pageHost = window.location.hostname;
+      var savedEp = localStorage.getItem(LS_CHAT_ENDPOINT);
+      if (!isLoopbackHost(pageHost)) {
+        if (savedEp && !endpointHostIsLoopback(savedEp)) {
+          setChatEndpoint(savedEp);
+        } else {
+          setChatEndpoint(window.location.origin);
+        }
+      } else {
+        if (savedEp) setChatEndpoint(savedEp);
+        else setChatEndpoint(window.location.origin);
+      }
+    } catch (e) {
+      setChatEndpoint(window.location.origin);
+    }
+  })();
+
+  (async function () {
+    await loadModelIdPanel();
+    try {
+      var scModel = document.getElementById('cmp-sc-model');
+      if (scModel && !scModel.value && oaiModelName) scModel.value = oaiModelName;
+    } catch (e) { /* ignore */ }
+    try {
+      applyCompareProfile();
+    } catch (e) { /* ignore */ }
+    syncCompareEndpointsToPageHost(window.location.hostname);
+  })();
+});
+</script>
+</body>
+</html>

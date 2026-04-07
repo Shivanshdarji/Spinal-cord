@@ -1,0 +1,22 @@
+# SpinalCord test UI behind nginx, API proxied to llama-server on the host.
+#
+# 1) On the host, start llama-server (e.g. dashboard/run_dashboard_prod.bat) on port 8080.
+# 2) From this folder: docker compose up -d
+# 3) Open http://localhost:8088/  (UI talks to /v1/* on same origin → nginx → host:8080)
+#
+# Linux: extra_hosts makes host.docker.internal resolve to the host gateway.
+
+services:
+  edge:
+    image: nginx:alpine
+    ports:
+      - "${EDGE_PORT:-8088}:80"
+    environment:
+      LLAMA_HOST: ${LLAMA_HOST:-host.docker.internal}
+      LLAMA_PORT: ${LLAMA_PORT:-8080}
+    volumes:
+      - ./templates:/etc/nginx/templates:ro
+      - ../dashboard:/usr/share/nginx/html:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

@@ -1,0 +1,27 @@
+{
+  "default_pack": "spinalcord_custom",
+  "packs": {
+    "spinalcord_custom": {
+      "description": "Your custom SCBrain + SCDraft checkpoints (.pt) via PyTorch adapters",
+      "kind": "pytorch_spinalcord_pt",
+      "brain_ckpt": "models/scbrain_best.pt",
+      "draft_ckpt": "models/scdraft_best.pt",
+      "tokenizer_vocab_size": 32000,
+      "gamma": 8,
+      "acceptance_floor": 0.0
+    },
+    "llama_scaffold_stub": {
+      "description": "Placeholder for future external-brain adapter wiring (llama.cpp / HF)",
+      "kind": "external_adapter_stub",
+      "notes": "Use dashboard/run_dashboard_llama_scaffold.bat for live llama.cpp scaffold chat today."
+    },
+    "llama_server_chat": {
+      "description": "Use an external llama-server endpoint via OpenAI-compatible chat API",
+      "kind": "llama_server_chat",
+      "endpoint": "http://127.0.0.1:8080",
+      "model_id": "",
+      "auto_discover_model_id": true,
+      "repeat_penalty": 1.15
+    }
+  }
+}

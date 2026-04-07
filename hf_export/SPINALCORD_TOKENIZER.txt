@@ -1,0 +1,2 @@
+tokenizer=sentencepiece_bpe
+vocab_size=32000

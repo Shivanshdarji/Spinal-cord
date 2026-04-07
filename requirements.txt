@@ -1,0 +1,29 @@
+# SpinalCord LLM — Python Dependencies
+# =========================================
+# Core ML:
+torch>=2.2.0               # PyTorch (install separately with CUDA support — see below)
+transformers>=4.40.0       # HuggingFace transformers (for tokenizers)
+tokenizers>=0.15.2         # Train custom BPE tokenizer (not LLaMA)
+sentencepiece>=0.2.0       # Train SentencePiece tokenizer (llama.cpp-compatible)
+datasets>=2.18.0           # HuggingFace datasets (TinyStories, etc.)
+accelerate>=0.28.0         # Multi-GPU / mixed-precision training helpers
+safetensors>=0.4.2         # Efficient model weight serialization
+
+# Optional (benchmark vs Claude API):
+# anthropic>=0.34.0        # pip install anthropic — for benchmark_speed.py remote compare
+
+# Utilities:
+tqdm>=4.66.0               # Progress bars
+numpy>=1.26.0              # Numerical operations
+matplotlib>=3.8.0          # Loss curve plotting
+rich>=13.7.0               # Pretty terminal output
+
+# =========================================
+# IMPORTANT: Install PyTorch with CUDA 11.8
+# (for RTX 2050 on Windows):
+#
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+#
+# Then install the rest:
+#   pip install -r requirements.txt
+# =========================================

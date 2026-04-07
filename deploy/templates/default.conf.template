@@ -1,0 +1,34 @@
+# envsubst fills LLAMA_HOST / LLAMA_PORT at container start (official nginx image).
+# Escape nginx $ vars as $$ for the running config.
+
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+        try_files $$uri $$uri/ /index.html;
+    }
+
+    location /v1/ {
+        proxy_pass http://${LLAMA_HOST}:${LLAMA_PORT}/v1/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $$host;
+        proxy_set_header X-Real-IP $$remote_addr;
+        proxy_set_header X-Forwarded-For $$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+
+    location /chat/ {
+        proxy_pass http://${LLAMA_HOST}:${LLAMA_PORT}/chat/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $$host;
+        proxy_set_header X-Real-IP $$remote_addr;
+        proxy_buffering off;
+        proxy_read_timeout 86400s;
+    }
+}

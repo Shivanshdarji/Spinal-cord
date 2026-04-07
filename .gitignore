@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+
+# Large ML artifacts (use releases or HF; do not commit)
+*.gguf
+*.pt
+*.bin
+*.safetensors
+models/*.gguf
+models/*.pt
+models/hf_export/**/*.safetensors
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.env
+.cursor/
+
+# Logs / local
+*.log
+server_log*.txt
+dashboard/server_log*.txt
+
+# Build
+build/
+dist/
+*.so
+*.dll

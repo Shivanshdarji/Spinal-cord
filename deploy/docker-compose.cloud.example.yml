@@ -1,0 +1,45 @@
+# Cloud GPU example (Linux + NVIDIA + Docker Compose v2).
+#
+# On the VPS: clone repo, put GGUF under spinalcord/models/, then from deploy/:
+#   cp docker-compose.cloud.example.yml docker-compose.cloud.yml
+#   # edit model filenames in `command` if needed
+#   docker compose -f docker-compose.cloud.yml up -d
+#
+# UI + API: http://<server-ip>:8080/
+#
+# If `gpus: all` fails, install nvidia-container-toolkit and use Docker 24+.
+# Image: https://github.com/ggml-org/llama.cpp/pkgs/container/llama.cpp
+
+services:
+  llama:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    restart: unless-stopped
+    gpus: all
+    volumes:
+      - ../models:/models:ro
+      - ../dashboard:/dashboard:ro
+    ports:
+      - "8080:8080"
+    command:
+      - "--model"
+      - "/models/scbrain_1b.gguf"
+      - "--model-draft"
+      - "/models/scdraft_120m.gguf"
+      - "--jinja"
+      - "--webui"
+      - "--draft-max"
+      - "8"
+      - "--draft-min"
+      - "2"
+      - "-c"
+      - "4096"
+      - "-ngl"
+      - "99"
+      - "-ngld"
+      - "0"
+      - "--host"
+      - "0.0.0.0"
+      - "--port"
+      - "8080"
+      - "--path"
+      - "/dashboard"
