@@ -20,9 +20,11 @@ import sys
 import traceback
 import urllib.error
 import urllib.request
+from contextlib import contextmanager
 from pathlib import Path
 
 from openai import OpenAI
+from openenv.core.client_types import StepResult
 
 REPO_ROOT = Path(__file__).resolve().parent
 BENCH_DIR = REPO_ROOT / "envs" / "spinalcord_bench"
@@ -32,6 +34,54 @@ if str(BENCH_DIR) not in sys.path:
 from spinalcord_bench.client import SpinalBenchClient  # noqa: E402
 from spinalcord_bench.models import SpinalBenchAction, SpinalBenchObservation  # noqa: E402
 from spinalcord_bench.server.graders import TASK_ORDER  # noqa: E402
+from spinalcord_bench.server.spinalcord_bench_env import SpinalBenchEnv  # noqa: E402
+
+
+class _LocalSyncEnv:
+    """Same reset/step shape as SyncEnvClient, but in-process (no WebSocket server)."""
+
+    def __init__(self) -> None:
+        self._env = SpinalBenchEnv()
+
+    def reset(self, **kwargs):
+        obs = self._env.reset(**kwargs)
+        r = obs.reward
+        return StepResult(
+            observation=obs,
+            reward=float(r) if r is not None else 0.0,
+            done=bool(getattr(obs, "done", False)),
+        )
+
+    def step(self, action, **kwargs):
+        obs = self._env.step(action, **kwargs)
+        r = obs.reward
+        return StepResult(
+            observation=obs,
+            reward=float(r) if r is not None else 0.0,
+            done=bool(obs.done),
+        )
+
+
+@contextmanager
+def open_bench_session(base_url: str):
+    """Prefer WebSocket client; if nothing listens (local dev), run env in-process."""
+    client = SpinalBenchClient(base_url=base_url).sync()
+    try:
+        client.connect()
+    except Exception as exc:
+        print(
+            f"OpenEnv server not reachable at {base_url} ({exc!s}). "
+            "Using in-process SpinalBenchEnv. "
+            "To use the API server: uvicorn spinalcord_bench.server.app:app --port 7860",
+            file=sys.stderr,
+            flush=True,
+        )
+        yield _LocalSyncEnv()
+        return
+    try:
+        yield client
+    finally:
+        client.close()
 
 # Satisfy deterministic graders if no LLM is available (CI / portal).
 _CANNED_REPLY: dict[str, str] = {
@@ -186,7 +236,7 @@ def main() -> int:
 
     scores: list[float] = []
     try:
-        with SpinalBenchClient(base_url=openenv_base).sync() as env:
+        with open_bench_session(openenv_base) as env:
             for i, task_id in enumerate(TASK_ORDER):
                 seed = 100 + i
                 try:
