@@ -127,20 +127,38 @@ def _models_list_url(base_url: str) -> str:
     return f"{root}/v1/models"
 
 
+def _usable_model_id(mid: str | None) -> bool:
+    """LiteLLM / some gateways expose a placeholder '*' model — never use it for chat."""
+    if mid is None:
+        return False
+    s = str(mid).strip()
+    if not s or s == "*":
+        return False
+    if s.lower() in ("any", "default", "auto"):
+        return False
+    return True
+
+
+def _model_id_from_obj(obj) -> str | None:
+    mid = getattr(obj, "id", None)
+    if mid is None and isinstance(obj, dict):
+        mid = obj.get("id")
+    if mid is None:
+        return None
+    return str(mid)
+
+
 def resolve_model_id(llm: OpenAI, base_url: str, api_key: str) -> str | None:
     explicit = os.environ.get("OPENAI_MODEL", "").strip()
-    if explicit:
+    if _usable_model_id(explicit):
         return explicit
     try:
         listed = llm.models.list()
         data = getattr(listed, "data", None) or []
-        if data:
-            first = data[0]
-            mid = getattr(first, "id", None)
-            if mid is None and isinstance(first, dict):
-                mid = first.get("id")
-            if mid:
-                return str(mid)
+        for item in data:
+            mid = _model_id_from_obj(item)
+            if _usable_model_id(mid):
+                return mid
     except Exception:
         pass
     url = _models_list_url(base_url)
@@ -154,7 +172,7 @@ def resolve_model_id(llm: OpenAI, base_url: str, api_key: str) -> str | None:
             payload = json.load(resp)
         for item in payload.get("data", []) or []:
             mid = item.get("id")
-            if mid:
+            if _usable_model_id(mid):
                 return str(mid)
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError):
         pass
@@ -181,11 +199,15 @@ def resolve_model_for_run(
     llm: OpenAI, base_url: str, api_key: str, uses_proxy: bool
 ) -> str | None:
     mid = resolve_model_id(llm, base_url, api_key)
-    if mid:
+    if mid and _usable_model_id(mid):
         return mid
     # Hackathon proxy: always perform real chat.completions calls (never canned-only).
     if uses_proxy:
-        return os.environ.get("DEFAULT_LLM_MODEL", "gpt-4o-mini")
+        for key in ("DEFAULT_LLM_MODEL", "LITELLM_MODEL", "MODEL_NAME"):
+            fallback = os.environ.get(key, "").strip()
+            if _usable_model_id(fallback):
+                return fallback
+        return "gpt-4o-mini"
     return None
 
 
