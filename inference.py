@@ -6,8 +6,10 @@ This script runs SpinalCord Bench tasks through:
 1) OpenEnv server (Space/local) via WebSocket client
 2) OpenAI-compatible model endpoint (SpinalCord llama-server style)
 
-Validators often omit OPENAI_MODEL — we resolve it via /v1/models, then fall back to
-deterministic answers if the chat API is unreachable (so Phase 2 does not hard-fail).
+Stdout must contain structured blocks for the portal validator:
+  [START] task=...
+  [STEP] step=N reward=...
+  [END] task=... score=... steps=...
 """
 
 from __future__ import annotations
@@ -42,8 +44,23 @@ _CANNED_REPLY: dict[str, str] = {
 }
 
 
+def _stdout(line: str) -> None:
+    """Validator parses stdout only — always flush."""
+    print(line, flush=True)
+
+
 def _prompt(obs: SpinalBenchObservation) -> str:
     return f"{obs.instruction}\n\nContext:\n{obs.reference_context}"
+
+
+def _step_reward(step) -> float:
+    r = getattr(step, "reward", None)
+    if r is not None:
+        return float(r)
+    obs = getattr(step, "observation", None)
+    if obs is not None and getattr(obs, "reward", None) is not None:
+        return float(obs.reward)
+    return 0.0
 
 
 def _models_list_url(base_url: str) -> str:
@@ -93,7 +110,8 @@ def run_episode(
     model: str,
     task_id: str,
     seed: int,
-) -> tuple[float, str]:
+) -> tuple[float, str, int]:
+    _stdout(f"[START] task={task_id}")
     result = env.reset(seed=seed, task_id=task_id)
     obs = result.observation
     messages = [
@@ -107,6 +125,7 @@ def run_episode(
     done = False
     final_score = 0.0
     detail = ""
+    step_count = 0
     while not done:
         rsp = llm.chat.completions.create(
             model=model,
@@ -116,28 +135,37 @@ def run_episode(
         )
         answer = (rsp.choices[0].message.content or "").strip() or " "
         step = env.step(SpinalBenchAction(content=answer))
+        step_count += 1
+        rew = _step_reward(step)
+        _stdout(f"[STEP] step={step_count} reward={rew}")
         obs = step.observation
         done = step.done
         final_score = obs.grader_score
         detail = obs.grader_detail
         messages.append({"role": "assistant", "content": answer})
-    return final_score, detail
+    _stdout(f"[END] task={task_id} score={final_score} steps={step_count}")
+    return final_score, detail, step_count
 
 
-def run_episode_canned(env, task_id: str, seed: int) -> tuple[float, str]:
+def run_episode_canned(env, task_id: str, seed: int) -> tuple[float, str, int]:
+    _stdout(f"[START] task={task_id}")
     text = _CANNED_REPLY[task_id]
-    result = env.reset(seed=seed, task_id=task_id)
-    obs = result.observation
+    env.reset(seed=seed, task_id=task_id)
     done = False
     final_score = 0.0
     detail = ""
+    step_count = 0
     while not done:
         step = env.step(SpinalBenchAction(content=text))
+        step_count += 1
+        rew = _step_reward(step)
+        _stdout(f"[STEP] step={step_count} reward={rew}")
         obs = step.observation
         done = step.done
         final_score = obs.grader_score
         detail = obs.grader_detail
-    return final_score, detail
+    _stdout(f"[END] task={task_id} score={final_score} steps={step_count}")
+    return final_score, detail, step_count
 
 
 def main() -> int:
@@ -148,11 +176,12 @@ def main() -> int:
     llm = OpenAI(base_url=openai_base, api_key=api_key)
     model_id = resolve_model_id(llm, openai_base, api_key)
     if model_id:
-        print(f"Using model id: {model_id}", file=sys.stderr)
+        print(f"Using model id: {model_id}", file=sys.stderr, flush=True)
     else:
         print(
             "OPENAI_MODEL not set and /v1/models unavailable — using canned answers.",
             file=sys.stderr,
+            flush=True,
         )
 
     scores: list[float] = []
@@ -162,24 +191,25 @@ def main() -> int:
                 seed = 100 + i
                 try:
                     if model_id:
-                        score, detail = run_episode(env, llm, model_id, task_id, seed)
+                        score, detail, _ = run_episode(env, llm, model_id, task_id, seed)
                     else:
-                        score, detail = run_episode_canned(env, task_id, seed)
+                        score, detail, _ = run_episode_canned(env, task_id, seed)
                 except Exception:
                     print(
                         f"LLM path failed for {task_id}; using canned fallback.",
                         file=sys.stderr,
+                        flush=True,
                     )
-                    traceback.print_exc()
-                    score, detail = run_episode_canned(env, task_id, seed)
+                    traceback.print_exc(file=sys.stderr)
+                    score, detail, _ = run_episode_canned(env, task_id, seed)
                 scores.append(score)
-                print(f"{task_id}: score={score:.3f} detail={detail}")
+                print(f"{task_id}: score={score:.3f} detail={detail}", file=sys.stderr, flush=True)
     except Exception:
-        traceback.print_exc()
+        traceback.print_exc(file=sys.stderr)
         return 1
 
     avg = sum(scores) / max(len(scores), 1)
-    print(f"average_score={avg:.3f}")
+    print(f"average_score={avg:.3f}", file=sys.stderr, flush=True)
     return 0
 
 
