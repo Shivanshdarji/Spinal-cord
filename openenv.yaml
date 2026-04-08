@@ -1,0 +1,6 @@
+spec_version: 1
+name: spinalcord_bench
+type: space
+runtime: fastapi
+app: spinalcord_bench.server.app:app
+port: 7860
