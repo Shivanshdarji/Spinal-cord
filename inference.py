@@ -4,7 +4,13 @@ Hackathon baseline entrypoint (required at repository root).
 
 This script runs SpinalCord Bench tasks through:
 1) OpenEnv server (Space/local) via WebSocket client
-2) OpenAI-compatible model endpoint (SpinalCord llama-server style)
+2) OpenAI-compatible chat API
+
+When the hackathon injects LiteLLM proxy credentials, you **must** use them so API
+traffic is observed:
+  API_BASE_URL + API_KEY
+
+Local SpinalCord / llama-server continues to use OPENAI_BASE_URL + OPENAI_API_KEY.
 
 Stdout must contain structured blocks for the portal validator:
   [START] task=...
@@ -83,7 +89,8 @@ def open_bench_session(base_url: str):
     finally:
         client.close()
 
-# Satisfy deterministic graders if no LLM is available (CI / portal).
+
+# Satisfy deterministic graders if no LLM is available (local dev only).
 _CANNED_REPLY: dict[str, str] = {
     "extract_total": "47.23 USD",
     "calendar_overlap": (
@@ -154,6 +161,34 @@ def resolve_model_id(llm: OpenAI, base_url: str, api_key: str) -> str | None:
     return None
 
 
+def llm_endpoints() -> tuple[str, str, bool]:
+    """
+    Returns (base_url, api_key, uses_hackathon_litellm_proxy).
+
+    Hackathon injects API_BASE_URL + API_KEY — these must take priority so the
+    validator observes traffic on their LiteLLM proxy.
+    """
+    hb = os.environ.get("API_BASE_URL", "").strip()
+    hk = os.environ.get("API_KEY", "").strip()
+    if hb and hk:
+        return hb, hk, True
+    ob = os.environ.get("OPENAI_BASE_URL", "http://127.0.0.1:8080/v1").strip()
+    ok = (os.environ.get("OPENAI_API_KEY") or os.environ.get("HF_TOKEN") or "unused").strip()
+    return ob, ok, False
+
+
+def resolve_model_for_run(
+    llm: OpenAI, base_url: str, api_key: str, uses_proxy: bool
+) -> str | None:
+    mid = resolve_model_id(llm, base_url, api_key)
+    if mid:
+        return mid
+    # Hackathon proxy: always perform real chat.completions calls (never canned-only).
+    if uses_proxy:
+        return os.environ.get("DEFAULT_LLM_MODEL", "gpt-4o-mini")
+    return None
+
+
 def run_episode(
     env,
     llm: OpenAI,
@@ -220,16 +255,22 @@ def run_episode_canned(env, task_id: str, seed: int) -> tuple[float, str, int]:
 
 def main() -> int:
     openenv_base = os.environ.get("OPENENV_BASE_URL", "http://127.0.0.1:7860")
-    openai_base = os.environ.get("OPENAI_BASE_URL", "http://127.0.0.1:8080/v1")
-    api_key = os.environ.get("OPENAI_API_KEY") or os.environ.get("HF_TOKEN") or "unused"
+    openai_base, api_key, uses_proxy = llm_endpoints()
 
     llm = OpenAI(base_url=openai_base, api_key=api_key)
-    model_id = resolve_model_id(llm, openai_base, api_key)
-    if model_id:
+    model_id = resolve_model_for_run(llm, openai_base, api_key, uses_proxy)
+
+    if uses_proxy:
+        print(
+            f"Using hackathon LiteLLM proxy at {openai_base!r} (model={model_id!r}).",
+            file=sys.stderr,
+            flush=True,
+        )
+    elif model_id:
         print(f"Using model id: {model_id}", file=sys.stderr, flush=True)
     else:
         print(
-            "OPENAI_MODEL not set and /v1/models unavailable — using canned answers.",
+            "OPENAI_MODEL not set and /v1/models unavailable — using canned answers (local only).",
             file=sys.stderr,
             flush=True,
         )
@@ -245,6 +286,10 @@ def main() -> int:
                     else:
                         score, detail, _ = run_episode_canned(env, task_id, seed)
                 except Exception:
+                    if uses_proxy:
+                        print("LLM call failed under hackathon proxy mode.", file=sys.stderr, flush=True)
+                        traceback.print_exc(file=sys.stderr)
+                        raise
                     print(
                         f"LLM path failed for {task_id}; using canned fallback.",
                         file=sys.stderr,
