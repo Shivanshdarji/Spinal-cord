@@ -22,38 +22,38 @@ def _norm(s: str) -> str:
 def grade_extract_total(reply: str) -> Tuple[float, str]:
     """Easy: find invoice total 47.23 in assistant reply."""
     if not reply.strip():
-        return 0.0, "empty"
+        return 0.01, "empty"
     if re.search(r"47\.23", reply):
-        return 1.0, "found_total"
+        return 0.99, "found_total"
     # partial credit if close
     if "47" in reply and "23" in reply:
         return 0.35, "partial_digits"
-    return 0.0, "total_not_found"
+    return 0.01, "total_not_found"
 
 
 def grade_calendar_overlap(reply: str) -> Tuple[float, str]:
     """Medium: must acknowledge overlap (YES) with minimal justification."""
     t = _norm(reply)
     if not t:
-        return 0.0, "empty"
+        return 0.01, "empty"
     has_yes = bool(re.search(r"\byes\b", t))
     has_overlap_word = "overlap" in t or "overlapping" in t or "conflict" in t
     time_hint = "10:30" in reply or "10:45" in reply
     if has_yes and (has_overlap_word or time_hint):
-        return 1.0, "correct_overlap"
+        return 0.99, "correct_overlap"
     if has_yes:
         return 0.55, "yes_but_weak_reason"
     if "no" in t:
-        return 0.0, "incorrect_no"
+        return 0.01, "incorrect_no"
     return 0.2, "unclear"
 
 
 def grade_log_error_code(reply: str) -> Tuple[float, str]:
     """Hard: first ERROR code in synthetic log is E42."""
     if not reply.strip():
-        return 0.0, "empty"
+        return 0.01, "empty"
     if re.search(r"\bE42\b", reply):
-        return 1.0, "found_E42"
+        return 0.99, "found_E42"
     if "e42" in reply.lower():
         return 0.85, "e42_wrong_case"
     if re.search(r"\bE\d+\b", reply):
