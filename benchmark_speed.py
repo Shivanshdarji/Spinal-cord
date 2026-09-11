@@ -136,12 +136,15 @@ def run_local_benchmark(
     input_ids = torch.tensor([prompt_ids], dtype=torch.long, device=device)
 
     brain = SpinalCordBrain(brain_cfg).to(device)
-    brain.load_state_dict(brain_state["model_state"])
+    # Some checkpoints may have early-exit heads disabled during training,
+    # which means weights can be absent. We don't need them for speculative
+    # decoding benchmarking (Brain-only forward), so allow partial loads.
+    brain.load_state_dict(brain_state["model_state"], strict=False)
     brain.eval()
 
     llm = SpinalCordLLM(draft_cfg, brain_cfg).to(device)
-    llm.brain.load_state_dict(brain_state["model_state"])
-    llm.draft.load_state_dict(draft_state["model_state"])
+    llm.brain.load_state_dict(brain_state["model_state"], strict=False)
+    llm.draft.load_state_dict(draft_state["model_state"], strict=False)
     llm.eval()
 
     p0 = next(brain.parameters())

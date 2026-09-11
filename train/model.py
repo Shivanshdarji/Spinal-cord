@@ -528,6 +528,9 @@ class SpinalCordLLM(nn.Module):
         brain_logits = self.brain(full_seq) # type: ignore
         
         # Step 3: Speculative decoding acceptance step (Algorithm 1 from the paper)
+        # Ensure all accepted token tensors live on the same device before stacking.
+        # This matters when draft runs on CPU and brain runs on CUDA.
+        target_device = context.device
         accepted = []
         n_accepted = 0
         
@@ -549,7 +552,7 @@ class SpinalCordLLM(nn.Module):
             
             # Stochastic acceptance
             if torch.rand(1).item() < acceptance_ratio:
-                accepted.append(draft_tokens[0, i])
+                accepted.append(draft_tokens[0, i].to(target_device))
                 n_accepted += 1
             else:
                 # Reject and resample from corrected distribution
@@ -564,12 +567,12 @@ class SpinalCordLLM(nn.Module):
                     # If corrected distribution collapses to 0, fall back to brain_probs.
                     resampled = torch.multinomial(brain_probs[0], num_samples=1)  # type: ignore
                 # Make sure we append a scalar token tensor (shape []).
-                accepted.append(resampled.squeeze(0))
+                accepted.append(resampled.squeeze(0).to(target_device))
                 break
 
         # If, for numerical edge cases, nothing was accepted/resampled, fall back to the draft's last token.
         if not accepted:
-            accepted.append(draft_tokens[0, -1])
+            accepted.append(draft_tokens[0, -1].to(target_device))
 
         accepted_tokens = torch.stack(accepted, dim=0).unsqueeze(0)
         return accepted_tokens, n_accepted, self.gamma
